@@ -27,6 +27,9 @@ namespace bililive_dm_like_debounce {
 
         public override void Start() {
             base.Start();
+
+            Debouncer.frequency = Properties.Settings.Default.frequency;
+            Debouncer.intervalMode = Properties.Settings.Default.intervalMode;
             hook();
         }
 
