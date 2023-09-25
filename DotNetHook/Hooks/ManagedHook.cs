@@ -4,10 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using DotNetHook.Models;
 
-namespace DotNetHook.Hooks
-{
-    public class ManagedHook : HookBase
-    {
+namespace DotNetHook.Hooks {
+    public class ManagedHook : HookBase {
         #region Public Properties
 
         /// <summary>
@@ -45,8 +43,7 @@ namespace DotNetHook.Hooks
         /// </summary>
         /// <param name="from">The target method to redirect.</param>
         /// <param name="to">The method to call when the target method is called.</param>
-        public ManagedHook(MethodBase from, MethodBase to)
-        {
+        public ManagedHook(MethodBase from, MethodBase to) {
             FromMethod = from;
             ToMethod = to;
         }
@@ -58,8 +55,7 @@ namespace DotNetHook.Hooks
         /// <summary>
         ///     Apply the hook to the methods supplied.
         /// </summary>
-        public override void Apply()
-        {
+        public override void Apply() {
             Redirect(FromMethod.MethodHandle, ToMethod.MethodHandle);
             IsEnabled = true;
         }
@@ -67,8 +63,7 @@ namespace DotNetHook.Hooks
         /// <summary>
         ///     Reapply the hook to the methods supplied.
         /// </summary>
-        public override void ReApply()
-        {
+        public override void ReApply() {
             if (_existingPtrData == null)
                 throw new NullReferenceException(
                     "ExistingPtrData was null. Call ManagedHook.Remove() to populate the data.");
@@ -79,15 +74,14 @@ namespace DotNetHook.Hooks
                 // Instead write back the contents from the existing ptr data first applied.
                 Marshal.WriteByte(_fromPtr, i, _existingPtrData[i]);
 
-            VirtualProtect(_fromPtr, (IntPtr) 5, x, out x);
+            VirtualProtect(_fromPtr, (IntPtr)5, x, out x);
             IsEnabled = true;
         }
 
         /// <summary>
         ///     Remove the hook from the methods supplied.
         /// </summary>
-        public override void Remove()
-        {
+        public override void Remove() {
             if (_originalPtrData == null)
                 throw new NullReferenceException(
                     "OriginalPtrData was null. Call ManagedHook.Apply() to populate the data.");
@@ -97,62 +91,35 @@ namespace DotNetHook.Hooks
 
             _existingPtrData = new byte[_originalPtrData.Length];
 
-            for (var i = 0; i < _originalPtrData.Length; i++)
-            {
+            for (var i = 0; i < _originalPtrData.Length; i++) {
                 // Add to the existing ptr data variable so we can reapply if need be.
                 _existingPtrData[i] = Marshal.ReadByte(_fromPtr, i);
 
                 Marshal.WriteByte(_fromPtr, i, _originalPtrData[i]);
             }
 
-            VirtualProtect(_fromPtr, (IntPtr) 5, x, out x);
+            VirtualProtect(_fromPtr, (IntPtr)5, x, out x);
             IsEnabled = false;
         }
 
-        public new void Call(object instance, params object[] args) 
-        {
+        public void Call(object instance, params object[] args) {
             Remove();
-            try
-            {
+            try {
                 FromMethod.Invoke(instance, args);
                 ReApply();
-                return ;
-            }
-            catch (Exception)
-            {
+                return;
+            } catch (Exception) {
                 // TODO: On Hook failure, raise an event, or called a logger.
             }
 
             ReApply();
-            return;
-
         }
-
-        public new T Call<T>(object instance, params object[] args) where T : class
-        {
-            Remove();
-            try
-            {
-                var ret = FromMethod.Invoke(instance, args) as T;
-                ReApply();
-                return ret;
-            }
-            catch (Exception)
-            {
-                // TODO: On Hook failure, raise an event, or called a logger.
-            }
-
-            ReApply();
-            return default(T);
-
-        }
-
+        
         #endregion
 
         #region Private Methods
 
-        private void Redirect(RuntimeMethodHandle from, RuntimeMethodHandle to)
-        {
+        private void Redirect(RuntimeMethodHandle from, RuntimeMethodHandle to) {
             RuntimeHelpers.PrepareMethod(from);
             RuntimeHelpers.PrepareMethod(to);
 
@@ -164,10 +131,9 @@ namespace DotNetHook.Hooks
             FromPtrData = new byte[32];
             Marshal.Copy(_fromPtr, FromPtrData, 0, 32);
 
-            VirtualProtect(_fromPtr, (IntPtr) 5, 0x40, out uint x);
+            VirtualProtect(_fromPtr, (IntPtr)5, 0x40, out uint x);
 
-            if (IntPtr.Size == 8)
-            {
+            if (IntPtr.Size == 8) {
                 // x64
 
                 _originalPtrData = new byte[13];
@@ -183,10 +149,7 @@ namespace DotNetHook.Hooks
                 Marshal.WriteByte(_fromPtr, 10, 0x41);
                 Marshal.WriteByte(_fromPtr, 11, 0xff);
                 Marshal.WriteByte(_fromPtr, 12, 0xe3);
-
-            }
-            else if (IntPtr.Size == 4)
-            {
+            } else if (IntPtr.Size == 4) {
                 // x86
 
                 _originalPtrData = new byte[6];
@@ -199,12 +162,12 @@ namespace DotNetHook.Hooks
                 Marshal.WriteByte(_fromPtr, 5, 0xc3);
             }
 
-            VirtualProtect(_fromPtr, (IntPtr) 5, x, out x);
+            VirtualProtect(_fromPtr, (IntPtr)5, x, out x);
         }
 
         [DllImport("kernel32.dll")]
         private static extern bool VirtualProtect(IntPtr lpAddress, IntPtr dwSize, uint flNewProtect,
-                                                  out uint lpflOldProtect);
+            out uint lpflOldProtect);
 
         #endregion
     }

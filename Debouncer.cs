@@ -23,7 +23,7 @@ namespace bililive_dm_like_debounce {
 
         // ReSharper disable once UnusedMember.Global
         public static void ProcDanmakuHook(object thisObj, DanmakuModel danmakuModel) {
-            if (danmakuModel.MsgType == MsgTypeEnum.Interact && Enum.GetName(typeof(InteractTypeEnum), danmakuModel.InteractType) == "Like") {
+            if (danmakuModel.MsgType == MsgTypeEnum.Interact && danmakuModel.InteractType == InteractTypeEnum.Like) {
                 long lastTime;
                 if (debounce.TryGetValue(danmakuModel.UserID_long, out lastTime)) {
                     if (!intervalMode)
