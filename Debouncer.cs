@@ -12,7 +12,7 @@ using DotNetHook.Hooks;
 
 namespace bililive_dm_like_debounce {
     public class Debouncer {
-        private static Dictionary<long, long> debounce;
+        private static Dictionary<long, long> debounce = new Dictionary<long, long>();
         public static int frequency;
         public static bool intervalMode;
 

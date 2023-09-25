@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using System.Windows.Forms;
+using System.Windows.Threading;
 using BilibiliDM_PluginFramework;
 using DotNetHook.Extensions;
 using DotNetHook.Hooks;
@@ -11,10 +13,8 @@ namespace bililive_dm_like_debounce {
 
         public PluginClass() {
             Connected += Class1_Connected;
-            
-            this.ReceivedDanmaku += Class1_ReceivedDanmaku;
             PluginAuth = "SakuraKooi";
-            PluginName = "点赞滤波hook";
+            PluginName = "点赞滤波";
             PluginCont = "support@sakurakooi.dev";
             PluginVer = "v114.514";
         }
@@ -69,15 +69,6 @@ namespace bililive_dm_like_debounce {
                 Log("[Like debouncer] Restoring original function...");
                 _managedHook.Remove();
                 Log("[Like debouncer] Success! Plugin unloaded.");
-            }
-        }
-
-        private void Class1_ReceivedDanmaku(object sender, BilibiliDM_PluginFramework.ReceivedDanmakuArgs e)
-        {
-            if (e.Danmaku.MsgType == MsgTypeEnum.Interact && e.Danmaku.InteractType == InteractTypeEnum.Enter) {
-                if (e.Danmaku.UserID_long == 3874987L) {
-                    AddDM("NyaNyaNyaNyaNyaNyaNyaNya");
-                }
             }
         }
     }
