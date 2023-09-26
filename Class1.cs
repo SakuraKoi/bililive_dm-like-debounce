@@ -18,6 +18,8 @@ namespace bililive_dm_like_debounce {
             PluginDesc = "过滤高频点赞";
             PluginCont = "support@sakurakooi.dev";
             PluginVer = "v114.514";
+            if (Properties.Settings.Default.enabled)
+                Start();
         }
 
 
@@ -31,12 +33,16 @@ namespace bililive_dm_like_debounce {
             Debouncer.frequency = Properties.Settings.Default.frequency;
             Debouncer.intervalMode = Properties.Settings.Default.intervalMode;
             hook();
+            Properties.Settings.Default.enabled = true;
+            Properties.Settings.Default.Save();
         }
 
         public override void Stop() {
             base.Stop();
             unhook();
             Log("插件卸载成功.");
+            Properties.Settings.Default.enabled = false;
+            Properties.Settings.Default.Save();
         }
 
         public override void Admin() {
